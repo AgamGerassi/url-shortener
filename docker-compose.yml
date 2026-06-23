@@ -22,7 +22,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    # Resource limits
     deploy:
       resources:
         limits:
@@ -31,9 +30,7 @@ services:
         reservations:
           cpus: "0.25"
           memory: 128M
-    # Security: read-only filesystem
     read_only: true
-    # Temp directory for Python cache etc.
     tmpfs:
       - /tmp
 

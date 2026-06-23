@@ -5,15 +5,21 @@ A production-ready URL shortener service built with FastAPI, PostgreSQL, and Red
 ## Quick Start
 
 ```bash
-# 1. Clone the repository
-git clone <repo-url> && cd url-shortener
+git clone https://github.com/AgamGerassi/url-shortener.git && cd url-shortener
 
-# 2. Copy environment variables
+# Set up your environment variables:
 cp .env.example .env
+nano .env  # Edit values as needed (database password, ports, etc.)
 
-# 3. Run everything
-docker compose up --build
+# Run the app:
+chmod +x start.sh
+./start.sh
 ```
+
+The script will automatically:
+1. Verify that all required dependencies are installed (and install any that are missing)
+2. Build and start all services
+3. Wait for health checks and confirm everything is running
 
 The API will be available at `http://localhost:8000`.
 

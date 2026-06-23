@@ -12,7 +12,6 @@ class URLCreate(BaseModel):
     def validate_url(cls, v: str) -> str:
         if len(v) > settings.MAX_URL_LENGTH:
             raise ValueError(f"URL must be less than {settings.MAX_URL_LENGTH} characters")
-        # Basic validation - must start with http:// or https://
         if not v.startswith(("http://", "https://")):
             raise ValueError("URL must start with http:// or https://")
         return v
@@ -31,7 +30,6 @@ class URLStats(BaseModel):
     short_code: str
     original_url: str
     created_at: datetime
-    access_count: int
 
 
 class HealthResponse(BaseModel):
