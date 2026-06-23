@@ -7,7 +7,6 @@ from app.database import engine, Base
 from app.routes import router
 from app.redis_client import redis_client
 
-# Configure structured logging
 structlog.configure(
     processors=[
         structlog.stdlib.filter_by_level,
@@ -28,12 +27,12 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
     logger.info("application_starting", version="1.0.0", environment=settings.ENVIRONMENT)
-    # Create tables on startup
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("database_tables_created")
     yield
-    # Shutdown
+
     logger.info("application_shutting_down")
     await redis_client.close()
     await engine.dispose()
