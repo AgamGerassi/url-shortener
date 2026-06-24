@@ -83,7 +83,9 @@ All configuration is via environment variables (see `.env.example`):
 | `POSTGRES_DB` | urlshortener | Database name |
 | `BASE_URL` | http://localhost:8000 | Public URL for generated links |
 | `ENVIRONMENT` | production | `production` or `development` |
-| `REDIS_TTL_SECONDS` | 3600 | Cache TTL |
+| `REDIS_TTL_SECONDS` | 3600 | Cache TTL (seconds) |
+| `WORKERS` | 2 | Number of uvicorn workers |
+| `API_PORT` | 8000 | Host port for the API |
 
 ## Stopping
 

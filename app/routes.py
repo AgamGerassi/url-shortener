@@ -1,7 +1,7 @@
 import secrets
 import string
 import structlog
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models import URL
 from app.schemas import URLCreate, URLResponse, URLStats, HealthResponse
-from app.redis_client import get_cached_url, set_cached_url, check_redis_health
+from app.redis_client import get_cached_url, set_cached_url, check_redis_health, check_rate_limit
 from app.config import settings
 
 logger = structlog.get_logger()
@@ -52,8 +52,13 @@ async def health_check(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/shorten", response_model=URLResponse, status_code=201, tags=["urls"])
-async def create_short_url(payload: URLCreate, db: AsyncSession = Depends(get_db)):
+async def create_short_url(request: Request, payload: URLCreate, db: AsyncSession = Depends(get_db)):
     """Create a shortened URL."""
+    # Rate limiting
+    client_ip = request.client.host
+    if not await check_rate_limit(client_ip):
+        raise HTTPException(status_code=429, detail="Too many requests.")
+
     # Check if URL already exists — return existing short code
     existing_url = await db.execute(select(URL).where(URL.original_url == payload.url))
     url_entry = existing_url.scalar_one_or_none()
