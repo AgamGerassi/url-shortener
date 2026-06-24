@@ -31,6 +31,7 @@ The API will be available at `http://localhost:8000`.
 | `GET` | `/{code}` | Redirect to original URL |
 | `GET` | `/{code}/stats` | Get access statistics |
 | `GET` | `/health` | Health check (DB + Redis) |
+| `GET` | `/docs` | Interactive API documentation (development only) |
 
 ### Examples
 
