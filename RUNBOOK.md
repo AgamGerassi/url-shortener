@@ -2,24 +2,21 @@
 
 Quick reference for debugging issues.
 
+> **Note:** For Redis commands, first load your env: `source .env`
+
 ---
 
 ## 🔍 First Steps (Always)
 
 ```bash
-# Check what's running
+# Check what's running and health status
 docker compose ps
 
-# Check health
+# Check application health (shows DB + Redis status)
 curl http://localhost:8000/health
 
-# View recent logs
+# View recent logs from all services
 docker compose logs --tail 50
-
-# View specific service logs
-docker compose logs api --tail 30
-docker compose logs db --tail 30
-docker compose logs redis --tail 30
 ```
 
 ---
@@ -30,16 +27,13 @@ docker compose logs redis --tail 30
 
 **Steps:**
 ```bash
-# 1. Is the container running?
-docker compose ps api
+# 1. Check logs for crash reason
+docker compose logs api --tail 30
 
-# 2. Check logs for crash reason
-docker compose logs api --tail 50
-
-# 3. Restart
+# 2. Restart
 docker compose restart api
 
-# 4. If still failing — rebuild
+# 3. If still failing — rebuild
 docker compose up --build api -d
 ```
 
@@ -56,8 +50,7 @@ docker compose up --build api -d
 
 **Steps:**
 ```bash
-# 1. Check DB container
-docker compose ps db
+# 1. Check logs
 docker compose logs db --tail 30
 
 # 2. Can you connect manually?
@@ -87,25 +80,22 @@ docker compose up --build -d
 
 **Steps:**
 ```bash
-# 1. Check Redis container
-docker compose ps redis
+# 1. Check logs
 docker compose logs redis --tail 20
 
-# 2. Can you ping it?
-docker compose exec redis redis-cli ping
+# 2. Check memory usage
+docker compose exec redis redis-cli -a $REDIS_PASSWORD info memory
 
-# 3. Check memory usage
-docker compose exec redis redis-cli info memory
-
-# 4. Restart Redis
+# 3. Restart Redis
 docker compose restart redis
 ```
 
 **Common causes:**
 - Memory limit reached (should auto-evict with LRU, but check)
 - Container crashed
+- Password mismatch (`REDIS_PASSWORD` in `.env` doesn't match what Redis was started with)
 
-**Note:** Redis is only a cache. If it's down, the API still works (just slower — reads from DB directly).
+**Note:** Redis is only a cache. If it's down, the API still works (just slower — reads from DB directly). Rate limiting will also be disabled temporarily.
 
 ---
 
@@ -116,8 +106,7 @@ docker compose restart redis
 # 1. Check API logs for the actual error
 docker compose logs api --tail 30 | grep -i error
 
-# 2. Common: DB schema mismatch
-# Fix: reset the database
+# 2. Common fix: DB schema mismatch — reset the database
 docker compose down -v
 docker compose up --build -d
 ```
@@ -137,7 +126,20 @@ docker compose exec db psql -U postgres -d urlshortener \
   -c "SELECT * FROM urls WHERE short_code = 'YOUR_CODE'"
 
 # 2. Check Redis cache
-docker compose exec redis redis-cli GET "url:YOUR_CODE"
+docker compose exec redis redis-cli -a $REDIS_PASSWORD GET "url:YOUR_CODE"
+```
+
+---
+
+## ❌ Problem: User getting 429 (rate limited)
+
+**Steps:**
+```bash
+# Check if IP is blocked
+docker compose exec redis redis-cli -a $REDIS_PASSWORD GET "blocked:THEIR_IP"
+
+# Unblock manually
+docker compose exec redis redis-cli -a $REDIS_PASSWORD DEL "blocked:THEIR_IP"
 ```
 
 ---
@@ -148,15 +150,12 @@ docker compose exec redis redis-cli GET "url:YOUR_CODE"
 # Live resource usage
 docker stats
 
-# Check container health status
-docker compose ps
-
 # Count URLs in database
 docker compose exec db psql -U postgres -d urlshortener \
   -c "SELECT count(*) FROM urls"
 
 # Check Redis memory
-docker compose exec redis redis-cli info memory | grep used_memory_human
+docker compose exec redis redis-cli -a $REDIS_PASSWORD info memory | grep used_memory_human
 
 # Full restart (keep data)
 docker compose down && docker compose up -d
@@ -169,14 +168,14 @@ docker compose down -v && docker compose up --build -d
 
 ## 🔑 Key Info
 
-| Service | Port | Container Name |
-|---------|------|----------------|
-| API | 8000 | url-shortener-api |
-| PostgreSQL | 5432 | url-shortener-db |
-| Redis | 6379 | url-shortener-redis |
+| Service | Internal Port | Container Name |
+|---------|---------------|----------------|
+| API | 8000 (exposed) | url-shortener-api |
+| PostgreSQL | 5432 (internal only) | url-shortener-db |
+| Redis | 6379 (internal only) | url-shortener-redis |
 
 | Log Level | When |
 |-----------|------|
 | `info` | Normal operations (url_created, cache_hit) |
-| `warning` | Degraded state (redis_get_failed, health_check_degraded) |
+| `warning` | Degraded state (redis_get_failed, health_check_degraded, ip_blocked) |
 | `error` | Something broke (short_code_collision_exhausted) |
