@@ -38,12 +38,17 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     if overall != "healthy":
         logger.warning("health_check_degraded", database=db_status, redis=redis_status)
 
-    return HealthResponse(
+    response = HealthResponse(
         status=overall,
         database=db_status,
         redis=redis_status,
         version="1.0.0",
     )
+
+    if overall != "healthy":
+        raise HTTPException(status_code=503, detail=response.model_dump())
+
+    return response
 
 
 @router.post("/shorten", response_model=URLResponse, status_code=201, tags=["urls"])
