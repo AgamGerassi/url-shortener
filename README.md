@@ -1,6 +1,6 @@
 # 🔗 URL Shortener
 
-A production-ready URL shortener service built with **FastAPI**, **PostgreSQL**, and **Redis**.
+A URL shortener service built with **FastAPI**, **PostgreSQL**, and **Redis**.
 
 ## 🚀 Quick Start
 
