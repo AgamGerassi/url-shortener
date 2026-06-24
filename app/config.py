@@ -14,8 +14,6 @@ class Settings(BaseSettings):
     SHORT_CODE_LENGTH: int = 7
     MAX_URL_LENGTH: int = 2048
 
-    RATE_LIMIT_PER_MINUTE: int = 60
-
     class Config:
         env_file = ".env"
 

@@ -54,6 +54,18 @@ async def health_check(db: AsyncSession = Depends(get_db)):
 @router.post("/shorten", response_model=URLResponse, status_code=201, tags=["urls"])
 async def create_short_url(payload: URLCreate, db: AsyncSession = Depends(get_db)):
     """Create a shortened URL."""
+    # Check if URL already exists — return existing short code
+    existing_url = await db.execute(select(URL).where(URL.original_url == payload.url))
+    url_entry = existing_url.scalar_one_or_none()
+    if url_entry:
+        return URLResponse(
+            short_code=url_entry.short_code,
+            short_url=f"{settings.BASE_URL}/{url_entry.short_code}",
+            original_url=url_entry.original_url,
+            created_at=url_entry.created_at,
+        )
+
+    # Generate a unique short code (retry if collision)
     for _ in range(10):
         short_code = generate_short_code()
         existing = await db.execute(select(URL).where(URL.short_code == short_code))

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
 from datetime import datetime
+import re
 from app.config import settings
 
 
@@ -14,6 +15,17 @@ class URLCreate(BaseModel):
             raise ValueError(f"URL must be less than {settings.MAX_URL_LENGTH} characters")
         if not v.startswith(("http://", "https://")):
             raise ValueError("URL must start with http:// or https://")
+
+        # Validate URL format (must have a valid domain with TLD)
+        url_pattern = re.compile(
+            r'^https?://'
+            r'([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}'  # domain.tld
+            r'(:\d{1,5})?'                       # optional port
+            r'(/.*)?$'                            # optional path
+        )
+        if not url_pattern.match(v):
+            raise ValueError("Invalid URL format")
+
         return v
 
 
