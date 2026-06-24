@@ -81,10 +81,12 @@ All configuration is via environment variables (see `.env.example`):
 | `POSTGRES_USER` | postgres | Database user |
 | `POSTGRES_PASSWORD` | postgres | Database password |
 | `POSTGRES_DB` | urlshortener | Database name |
+| `REDIS_PASSWORD` | redis | Redis authentication password |
 | `BASE_URL` | http://localhost:8000 | Public URL for generated links |
 | `ENVIRONMENT` | production | `production` or `development` |
 | `REDIS_TTL_SECONDS` | 3600 | Cache TTL (seconds) |
 | `WORKERS` | 2 | Number of uvicorn workers |
+| `RATE_LIMIT_PER_MINUTE` | 30 | Max requests per IP per minute (blocked for 1 hour if exceeded) |
 | `API_PORT` | 8000 | Host port for the API |
 
 ## Stopping
