@@ -94,3 +94,7 @@ docker compose down
 # Stop and delete all data
 docker compose down -v
 ```
+
+## 🚨 Troubleshooting
+
+See [RUNBOOK.md](RUNBOOK.md) for on-call debugging guide.
