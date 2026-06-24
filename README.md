@@ -1,8 +1,8 @@
-# URL Shortener
+# 🔗 URL Shortener
 
-A production-ready URL shortener service built with FastAPI, PostgreSQL, and Redis.
+A production-ready URL shortener service built with **FastAPI**, **PostgreSQL**, and **Redis**.
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/AgamGerassi/url-shortener.git && cd url-shortener
@@ -23,7 +23,7 @@ The script will automatically:
 
 The API will be available at `http://localhost:8000`.
 
-## API Endpoints
+## 📡 API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -56,7 +56,7 @@ curl -X POST http://localhost:8000/shorten \
 curl -L http://localhost:8000/aB3dEfG
 ```
 
-## Architecture
+## 🏗️ Architecture
 
 ```
 ┌──────────┐     ┌───────────┐     ┌────────────┐
@@ -71,42 +71,7 @@ curl -L http://localhost:8000/aB3dEfG
 - **PostgreSQL** - Persistent storage for URL mappings
 - **Redis** - LRU cache for fast lookups, reduces DB load
 
-## Design Decisions
-
-### Why FastAPI?
-- Async by default (great for I/O-bound work like DB/Redis calls)
-- Built-in request validation via Pydantic
-- Auto-generated API documentation
-- Widely adopted, easy for the next engineer to pick up
-
-### Multi-stage Docker Build
-- **Builder stage**: installs dependencies
-- **Production stage**: only copies the virtualenv and app code
-- Result: smaller image (~150MB vs ~900MB full Python image)
-
-### Security Hardening
-- Container runs as non-root user (`appuser`)
-- Read-only filesystem in production
-- Resource limits (CPU/memory) to prevent noisy-neighbor issues
-- No debug endpoints in production mode
-- URL validation to prevent injection
-
-### Data Persistence
-- PostgreSQL data stored in a named Docker volume (`postgres_data`)
-- Survives `docker compose down` and container restarts
-- To fully reset: `docker compose down -v`
-
-### Caching Strategy
-- Redis with LRU eviction policy (`allkeys-lru`)
-- 1-hour TTL on cached entries
-- Graceful degradation: if Redis is down, app still works via DB
-
-### Health Checks
-- Docker-level HEALTHCHECK in Dockerfile
-- Compose-level health checks for dependency ordering
-- Application-level `/health` endpoint checks both DB and Redis
-
-## Configuration
+## ⚙️ Configuration
 
 All configuration is via environment variables (see `.env.example`):
 
