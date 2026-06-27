@@ -168,11 +168,13 @@ docker compose down -v && docker compose up --build -d
 
 ## 🔑 Key Info
 
-| Service | Internal Port | Container Name |
-|---------|---------------|----------------|
-| API | 8000 (exposed) | url-shortener-api |
+| Service | Port | Container Name |
+|---------|------|----------------|
+| API | 8000 (exposed to host) | url-shortener-api |
 | PostgreSQL | 5432 (internal only) | url-shortener-db |
 | Redis | 6379 (internal only) | url-shortener-redis |
+
+> DB and Redis are not exposed to the host. Use `docker compose exec` to access them.
 
 | Log Level | When |
 |-----------|------|

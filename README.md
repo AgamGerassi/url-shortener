@@ -70,7 +70,7 @@ curl -L http://localhost:8000/aB3dEfG
 
 - **FastAPI** - Handles HTTP requests, URL creation, and redirects
 - **PostgreSQL** - Persistent storage for URL mappings
-- **Redis** - LRU cache for fast lookups, reduces DB load
+- **Redis** - LRU cache for fast lookups, rate limiting, reduces DB load
 
 ## ⚙️ Configuration
 
@@ -86,7 +86,8 @@ All configuration is via environment variables (see `.env.example`):
 | `ENVIRONMENT` | production | `production` or `development` |
 | `REDIS_TTL_SECONDS` | 3600 | Cache TTL (seconds) |
 | `WORKERS` | 2 | Number of uvicorn workers |
-| `RATE_LIMIT_PER_MINUTE` | 30 | Max requests per IP per minute (blocked for 1 hour if exceeded) |
+| `RATE_LIMIT_POST_PER_MINUTE` | 30 | Max POST requests per IP per minute |
+| `RATE_LIMIT_GET_PER_MINUTE` | 200 | Max GET requests per IP per minute |
 | `API_PORT` | 8000 | Host port for the API |
 
 ## Stopping
