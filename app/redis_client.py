@@ -42,20 +42,22 @@ async def check_redis_health() -> bool:
         return False
 
 
-async def check_rate_limit(ip: str) -> bool:
+async def check_rate_limit(ip: str, limit: int = None, prefix: str = "rate") -> bool:
     """Check if IP has exceeded rate limit. Returns True if allowed, False if blocked."""
+    if limit is None:
+        limit = settings.RATE_LIMIT_POST_PER_MINUTE
     try:
         if await redis_client.get(f"blocked:{ip}"):
             return False
 
-        key = f"rate:{ip}"
+        key = f"{prefix}:{ip}"
         current = await redis_client.incr(key)
         if current == 1:
             await redis_client.expire(key, 60)  # 1 minute window
 
-        if current > settings.RATE_LIMIT_PER_MINUTE:
+        if current > limit:
             await redis_client.set(f"blocked:{ip}", "1", ex=3600)  # Block IP for 1 hour
-            logger.warning("ip_blocked", ip=ip, requests=current)
+            logger.warning("ip_blocked", ip=ip, requests=current, type=prefix)
             return False
 
         return True

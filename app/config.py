@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "production"
     SHORT_CODE_LENGTH: int = 7
     MAX_URL_LENGTH: int = 2048
-    RATE_LIMIT_PER_MINUTE: int = 30
+    RATE_LIMIT_POST_PER_MINUTE: int = 30
+    RATE_LIMIT_GET_PER_MINUTE: int = 200
 
     class Config:
         env_file = ".env"

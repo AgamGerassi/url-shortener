@@ -19,9 +19,9 @@ class URLCreate(BaseModel):
         # Validate URL format (must have a valid domain with TLD)
         url_pattern = re.compile(
             r'^https?://'
-            r'([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}'  # domain.tld
-            r'(:\d{1,5})?'                       # optional port
-            r'(/.*)?$'                            # optional path
+            r'([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}' 
+            r'(:\d{1,5})?'                      
+            r'(/.*)?$'                      
         )
         if not url_pattern.match(v):
             raise ValueError("Invalid URL format")

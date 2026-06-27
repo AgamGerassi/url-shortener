@@ -14,7 +14,8 @@ services:
       - ENVIRONMENT=${ENVIRONMENT:-production}
       - REDIS_TTL_SECONDS=${REDIS_TTL_SECONDS:-3600}
       - WORKERS=${WORKERS:-2}
-      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-30}
+      - RATE_LIMIT_POST_PER_MINUTE=${RATE_LIMIT_POST_PER_MINUTE:-30}
+      - RATE_LIMIT_GET_PER_MINUTE=${RATE_LIMIT_GET_PER_MINUTE:-200}
     depends_on:
       db:
         condition: service_healthy

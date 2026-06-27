@@ -54,9 +54,8 @@ async def health_check(db: AsyncSession = Depends(get_db)):
 @router.post("/shorten", response_model=URLResponse, status_code=201, tags=["urls"])
 async def create_short_url(request: Request, payload: URLCreate, db: AsyncSession = Depends(get_db)):
     """Create a shortened URL."""
-    # Rate limiting
     client_ip = request.client.host
-    if not await check_rate_limit(client_ip):
+    if not await check_rate_limit(client_ip, limit=settings.RATE_LIMIT_POST_PER_MINUTE, prefix="rate_post"):
         raise HTTPException(status_code=429, detail="Too many requests.")
 
     # Check if URL already exists — return existing short code
@@ -98,8 +97,12 @@ async def create_short_url(request: Request, payload: URLCreate, db: AsyncSessio
 
 
 @router.get("/{short_code}", tags=["urls"])
-async def redirect_to_url(short_code: str, db: AsyncSession = Depends(get_db)):
+async def redirect_to_url(request: Request, short_code: str, db: AsyncSession = Depends(get_db)):
     """Redirect a short code to its original URL."""
+    client_ip = request.client.host
+    if not await check_rate_limit(client_ip, limit=settings.RATE_LIMIT_GET_PER_MINUTE, prefix="rate_get"):
+        raise HTTPException(status_code=429, detail="Too many requests.")
+
     cached_url = await get_cached_url(short_code)
     if cached_url:
         logger.info("cache_hit", short_code=short_code)
@@ -119,8 +122,12 @@ async def redirect_to_url(short_code: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{short_code}/stats", response_model=URLStats, tags=["urls"])
-async def get_url_stats(short_code: str, db: AsyncSession = Depends(get_db)):
+async def get_url_stats(request: Request, short_code: str, db: AsyncSession = Depends(get_db)):
     """Get statistics for a shortened URL."""
+    client_ip = request.client.host
+    if not await check_rate_limit(client_ip, limit=settings.RATE_LIMIT_GET_PER_MINUTE, prefix="rate_get"):
+        raise HTTPException(status_code=429, detail="Too many requests.")
+
     result = await db.execute(select(URL).where(URL.short_code == short_code))
     url_entry = result.scalar_one_or_none()
 
